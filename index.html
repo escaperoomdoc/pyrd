@@ -1,0 +1,64 @@
+<div id="app">
+	<img
+		ref="screen"
+		style="height: 100%; width: auto; object-fit: contain"
+		:src="img"
+		alt="screen"
+	>
+</div>
+
+<style>
+body {
+	user-select:none;
+}
+</style>
+
+<script type="module">
+import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+
+createApp({
+	data() {
+		return {
+			img: 'http://127.0.0.1:80/screenshot'
+		}
+	},
+	mounted() {
+		let screen = this.$refs.screen;
+		screen.addEventListener('click', (event) => {
+			if (screen.naturalWidth === 0 && screen.naturalHeight === 0) {
+				screen.addEventListener('load', (loadEvent) => {
+					getCoordinates();
+				}, {once : true})
+			} else {
+				getCoordinates();
+			}
+			
+			function getCoordinates() {
+				let x = Math.round((event.offsetX / screen.width) * screen.naturalWidth);
+				let y = Math.round((event.offsetY / screen.height) * screen.naturalHeight);
+				const response = fetch('http://127.0.0.1:80/control', {
+					method: 'POST', // *GET, POST, PUT, DELETE, etc.
+					mode: 'cors', // no-cors, *cors, same-origin
+					cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+					credentials: 'same-origin', // include, *same-origin, omit
+					headers: {
+						'Content-Type': 'application/json'
+						// 'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					redirect: 'follow', // manual, *follow, error
+					referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+					body: JSON.stringify({
+						type: 'mouse-click',
+						x: x,
+						y: y
+					}) // body data type must match "Content-Type" header
+				});
+			}
+		});
+		setInterval(() => {
+			//this.img = 'https://placeimg.com/1920/1080/nature?t' + Math.random();
+			this.img = 'http://127.0.0.1:80/screenshot' + Math.random();
+		}, 400);
+	}
+}).mount('#app')
+</script>
