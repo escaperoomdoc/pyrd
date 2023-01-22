@@ -1,4 +1,4 @@
-import os
+import subprocess
 import io
 import json
 import pyautogui
@@ -30,8 +30,17 @@ def screenshot_thread_function():
             response = requests.get(HTTP_SERVER_URL + '/control')
             control = json.loads(response.text)
             for item in control:
+                if item['type'] == 'mouse-move':
+                    pyautogui.click(item['x'], item['y'])
                 if item['type'] == 'mouse-click':
                     pyautogui.click(x=item['x'], y=item['y'])
+                if item['type'] == 'mouse-click-right':
+                    pyautogui.click(x=item['x'], y=item['y'], button='right')
+                if item['type'] == 'mouse-double-click':
+                    pyautogui.click(x=item['x'], y=item['y'], clicks=2, interval=0.25)
+                if item['type'] == 'run':
+                    subprocess.run(item['command'])
+                    #'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe https://us05web.zoom.us/j/3763055085?pwd=S1Z4Qk1mdW9yd3h2RzdDM2xiNTEzQT09'
             delay_value = 0.3
         except Exception as e:
             print('screenshot_thread_function exception: ', e.args[0])
