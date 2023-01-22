@@ -41,7 +41,7 @@ def screenshot_thread_function():
                 if item['type'] == 'run':
                     subprocess.run(item['command'])
                     #'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe https://us05web.zoom.us/j/3763055085?pwd=S1Z4Qk1mdW9yd3h2RzdDM2xiNTEzQT09'
-            delay_value = 0.3
+            delay_value = 1
         except Exception as e:
             print('screenshot_thread_function exception: ', e.args[0])
             delay_value = 5
