@@ -19,7 +19,7 @@ import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
 createApp({
 	data() {
 		return {
-			img: 'http://127.0.0.1:80/screenshot'
+			img: '/screenshot'
 		}
 	},
 	mounted() {
@@ -36,7 +36,7 @@ createApp({
 			function getCoordinates() {
 				let x = Math.round((event.offsetX / screen.width) * screen.naturalWidth);
 				let y = Math.round((event.offsetY / screen.height) * screen.naturalHeight);
-				const response = fetch('http://127.0.0.1:80/control', {
+				const response = fetch('/control', {
 					method: 'POST', // *GET, POST, PUT, DELETE, etc.
 					mode: 'cors', // no-cors, *cors, same-origin
 					cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
@@ -57,7 +57,7 @@ createApp({
 		});
 		setInterval(() => {
 			//this.img = 'https://placeimg.com/1920/1080/nature?t' + Math.random();
-			this.img = 'http://127.0.0.1:80/screenshot' + Math.random();
+			this.img = '/screenshot' + Math.random();
 		}, 400);
 	}
 }).mount('#app')
