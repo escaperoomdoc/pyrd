@@ -1,0 +1,12 @@
+version: "3" 
+
+services:
+  pyrd:
+    build: .
+    container_name: "pyrd"
+    restart: always
+
+networks:
+  default:
+    name: global-network
+    external: true
