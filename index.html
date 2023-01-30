@@ -24,37 +24,80 @@ createApp({
 	},
 	mounted() {
 		let screen = this.$refs.screen;
+		
 		screen.addEventListener('click', (event) => {
 			if (screen.naturalWidth === 0 && screen.naturalHeight === 0) {
 				screen.addEventListener('load', (loadEvent) => {
-					getCoordinates();
+					getCoordinates('mouse-click', event);
 				}, {once : true})
 			} else {
-				getCoordinates();
-			}
-			
-			function getCoordinates() {
-				let x = Math.round((event.offsetX / screen.width) * screen.naturalWidth);
-				let y = Math.round((event.offsetY / screen.height) * screen.naturalHeight);
-				const response = fetch('/control', {
-					method: 'POST', // *GET, POST, PUT, DELETE, etc.
-					mode: 'cors', // no-cors, *cors, same-origin
-					cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-					credentials: 'same-origin', // include, *same-origin, omit
-					headers: {
-						'Content-Type': 'application/json'
-						// 'Content-Type': 'application/x-www-form-urlencoded',
-					},
-					redirect: 'follow', // manual, *follow, error
-					referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-					body: JSON.stringify({
-						type: 'mouse-click',
-						x: x,
-						y: y
-					}) // body data type must match "Content-Type" header
-				});
+				getCoordinates('mouse-click', event);
 			}
 		});
+		
+		screen.addEventListener('dblclick', (event) => {
+			if (screen.naturalWidth === 0 && screen.naturalHeight === 0) {
+				screen.addEventListener('load', (loadEvent) => {
+					getCoordinates('mouse-double-click', event);
+				}, {once : true})
+			} else {
+				getCoordinates('mouse-double-click', event);
+			}
+		});
+		
+		screen.addEventListener('contextmenu', (event) => {
+			event.preventDefault();
+			if (screen.naturalWidth === 0 && screen.naturalHeight === 0) {
+				screen.addEventListener('load', (loadEvent) => {
+					getCoordinates('mouse-click-right', event);
+				}, {once : true})
+			} else {
+				getCoordinates('mouse-click-right', event);
+			}
+		});
+		
+		let wait = false;
+		let timesPerSecond = 3;
+		screen.addEventListener('mousemove', (event) => {
+			if (!wait) {
+				if (screen.naturalWidth === 0 && screen.naturalHeight === 0) {
+					screen.addEventListener('load', (loadEvent) => {
+						getCoordinates('mouse-move', event);
+					}, {once : true})
+				} else {
+					getCoordinates('mouse-move', event);
+				}
+				
+				wait = true;
+				setTimeout(function () {
+					wait = false;
+				}, 1000 / timesPerSecond);
+
+			}
+		});
+		
+		function getCoordinates(type, event) {
+			let x = Math.round((event.offsetX / screen.width) * screen.naturalWidth);
+			let y = Math.round((event.offsetY / screen.height) * screen.naturalHeight);
+			const response = fetch('/control', {
+				method: 'POST', // *GET, POST, PUT, DELETE, etc.
+				mode: 'cors', // no-cors, *cors, same-origin
+				cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+				credentials: 'same-origin', // include, *same-origin, omit
+				headers: {
+					'Content-Type': 'application/json'
+					// 'Content-Type': 'application/x-www-form-urlencoded',
+				},
+				redirect: 'follow', // manual, *follow, error
+				referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+				body: JSON.stringify({
+					type: type,
+					x: x,
+					y: y
+				}) // body data type must match "Content-Type" header
+			});
+		}
+		
 		setInterval(() => {
 			//this.img = 'https://placeimg.com/1920/1080/nature?t' + Math.random();
 			this.img = '/screenshot' + Math.random();
