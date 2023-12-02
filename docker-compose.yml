@@ -5,8 +5,10 @@ services:
     build: .
     container_name: "pyrd"
     restart: always
+    ports:
+    - 8899:8899
 
-networks:
-  default:
-    name: global-network
-    external: true
+#networks:
+#  default:
+#    name: global-network
+#    external: true

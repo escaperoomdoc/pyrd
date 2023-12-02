@@ -1,18 +1,32 @@
 import json
 import time
 import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import base64
+import signal
 
-HTTP_SERVER_PORT = 80
+#from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+import threading
+
+HTTP_SERVER_PORT = 8899
 
 def now() -> int:
     return int(time.time() * 1000)
 
+exit_flag: bool = False
+def signal_handler(sig, frame):
+    global exit_flag
+    exit_flag = True
+    print('Ctrl+C pressed!')
+    pass
+
+signal.signal(signal.SIGINT, signal_handler)
+
+
 class RemoteDesktop:
     def __init__(self):
-        self.screenshot: None
+        self.screenshot = None
         self.commands = []
 rd: RemoteDesktop = RemoteDesktop()
 
@@ -49,7 +63,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
                     if rd.screenshot:
                         self.wfile.write(rd.screenshot)
                     else:
-                        self.wfile.write('')
+                        self.wfile.write(bytes())
                 if '/control' in parsed_path.path:
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/json')
@@ -92,10 +106,27 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         return
 
-def web_server_thread_function(rd):
-    httpd = HTTPServer(('', HTTP_SERVER_PORT), HTTPRequestHandler)
-    httpd.serve_forever()
+web_server: ThreadingHTTPServer = None
+def web_server_thread_function():
+    global web_server
+    web_server = ThreadingHTTPServer(('0.0.0.0', HTTP_SERVER_PORT), HTTPRequestHandler)
+    web_server.serve_forever()
+    print(f'web server listening 0.0.0.0:{HTTP_SERVER_PORT}...')
+    try:
+        web_server.serve_forever()
+    except Exception as e:
+        print(f'signal server stopped')
+        print(e.args[0])
+    web_server.server_close()
+    print(f'signal server stopped')
 
-web_server_thread = threading.Thread(target=web_server_thread_function, args=(rd,))
+print('init')
+web_server_thread = threading.Thread(target=web_server_thread_function, args=())
 web_server_thread.start()
 
+while True:
+    if exit_flag:
+        break
+    time.sleep(0.1)
+
+web_server.shutdown()
